@@ -12,10 +12,10 @@
 namespace FOS\RestBundle\EventListener;
 
 use FOS\RestBundle\FOSRestBundle;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\HttpKernel\EventListener\ExceptionListener as HttpKernelExceptionListener;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
 
 /**
@@ -28,21 +28,6 @@ use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
 class ExceptionListener extends HttpKernelExceptionListener
 {
     /**
-     * @var HttpKernelExceptionListener
-     */
-    private $wrappedExceptionListener;
-
-    public function __construct(
-        $controller,
-        LoggerInterface $logger = null,
-        HttpKernelExceptionListener $wrappedExceptionListener = null
-    ) {
-        parent::__construct($controller, $logger);
-
-        $this->wrappedExceptionListener = $wrappedExceptionListener;
-    }
-
-    /**
      * {@inheritdoc}
      */
     public function onKernelException(GetResponseForExceptionEvent $event)
@@ -50,14 +35,20 @@ class ExceptionListener extends HttpKernelExceptionListener
         $request = $event->getRequest();
 
         if (!$request->attributes->get(FOSRestBundle::ZONE_ATTRIBUTE, true)) {
-            if (null !== $this->wrappedExceptionListener) {
-                return $this->wrappedExceptionListener->onKernelException($event);
-            }
-
             return;
         }
 
         parent::onKernelException($event);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
+    {
+        return array(
+            KernelEvents::EXCEPTION => array('onKernelException', -100),
+        );
     }
 
     /**

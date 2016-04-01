@@ -13,4 +13,5 @@ return [
     new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
     new \Symfony\Bundle\TwigBundle\TwigBundle(),
     new \FOS\RestBundle\FOSRestBundle(),
+    new \FOS\RestBundle\Tests\Functional\Bundle\TestBundle\TestBundle(),
 ];
